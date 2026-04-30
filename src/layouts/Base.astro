@@ -1,0 +1,44 @@
+---
+// Base shell — shared <head>, theme stylesheet, font preloads. Pages
+// render their content into the <slot/>. Intentionally minimal — the
+// design language lives in components, not in this wrapper.
+import "../styles/theme.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Quaestor — the audit office for the machine economy",
+  description = "Local-first agent payments. Mandate JWTs, BLAKE3-chained ledger, on-device policy LLM.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="description" content={description} />
+    <link
+      rel="preload"
+      href="/fonts/cormorant-infant/cormorant-infant-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

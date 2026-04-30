@@ -1,0 +1,95 @@
+/*
+ * Quaestor design tokens + self-hosted fonts.
+ *
+ * Two faces only: Cormorant Infant (serif display) + JetBrains Mono.
+ * Two-and-a-half color palette: cream background, ink primary,
+ * oxblood accent, sodium green reserved for verified states.
+ */
+
+@import "tailwindcss";
+
+/* Self-hosted Cormorant Infant. No CDN dependency at runtime. */
+@font-face {
+  font-family: "Cormorant Infant";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/cormorant-infant/cormorant-infant-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Infant";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/cormorant-infant/cormorant-infant-latin-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Infant";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/cormorant-infant/cormorant-infant-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Infant";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/cormorant-infant/cormorant-infant-latin-700-italic.woff2") format("woff2");
+}
+
+/* Self-hosted JetBrains Mono. */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono/jetbrains-mono-latin-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono/jetbrains-mono-latin-500-italic.woff2") format("woff2");
+}
+
+/* Tailwind v4 design tokens via @theme. The two-color palette + the
+   single sodium-green verification accent. Anything not declared here
+   should not appear in the design. */
+@theme {
+  --color-cream: #f4ede0;
+  --color-ink: #1a1817;
+  --color-oxblood: #7d2a1f;
+  --color-sodium: #32d583;
+
+  --font-display: "Cormorant Infant", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root {
+  color-scheme: light only;
+}
+
+html,
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
