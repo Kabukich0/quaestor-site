@@ -1,7 +1,12 @@
 ---
-// Layer 0 stub. Empty by design — the layered landing page is built in
-// the next prompt; this scaffolding pass only verifies the toolchain.
 import Base from "../layouts/Base.astro";
+import { Lobby } from "../components/Lobby";
+
+const title = "Quaestor";
+const description =
+  "The audit office for the machine economy. A non-custodial mandate engine and audit ledger for AI agent payments.";
 ---
 
-<Base />
+<Base title={title} description={description}>
+  <Lobby client:load />
+</Base>

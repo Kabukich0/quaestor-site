@@ -68,17 +68,25 @@
   src: url("/fonts/jetbrains-mono/jetbrains-mono-latin-500-italic.woff2") format("woff2");
 }
 
-/* Tailwind v4 design tokens via @theme. The two-color palette + the
-   single sodium-green verification accent. Anything not declared here
-   should not appear in the design. */
+/* Tailwind v4 design tokens via @theme. The locked Quaestor palette plus
+   the single sodium-green verification accent (reserved for Layer 2+;
+   never appears on Layer 0). Anything not declared here should not
+   appear in the design. */
 @theme {
   --color-cream: #f4ede0;
   --color-ink: #1a1817;
+  --color-muted: #7a6f5e;
   --color-oxblood: #7d2a1f;
+  --color-stone: #3a3633;
   --color-sodium: #32d583;
 
   --font-display: "Cormorant Infant", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Easing curves — the impeccable motion-design reference's exponential
+     out-set. Out-expo is the wordmark/tagline default. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 :root {
@@ -92,4 +100,18 @@ body {
   font-family: var(--font-mono);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Reduced-motion blanket: a single fade-in for everything, no spatial
+   movement. Individual components also gate motion internally so
+   animations never start. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
