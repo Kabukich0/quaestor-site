@@ -1,18 +1,18 @@
 /**
- * Layer 0 / Lobby — composes Wordmark, Taglines, AsciiBust, NavLinks
- * into the locked two-column layout. Above-the-fold only; no scroll
- * behaviour, no other interaction surface.
+ * Layer 0 / Lobby — composes Wordmark, Taglines, TypographicField,
+ * NavLinks into the locked two-column layout. Above-the-fold only;
+ * no scroll behaviour, no other interaction surface.
  *
  * Layout:
  *   - 100vh full viewport
- *   - flex two-column at >=768px:  40% wordmark stack | 60% bust
- *   - single-column collapse at <768px: bust above, 60% size, 50% opacity
+ *   - flex two-column at >=768px: 40% wordmark stack | 60% typo field
+ *   - single-column collapse at <768px: field above, smaller scale
  *
  * Padding follows the spec's clamp(48px, 6vw, 96px).
  */
-import { AsciiBust } from "./AsciiBust";
 import { NavLinks } from "./NavLinks";
 import { Taglines } from "./Taglines";
+import { TypographicField } from "./TypographicField";
 import { Wordmark } from "./Wordmark";
 
 export function Lobby() {
@@ -29,8 +29,8 @@ export function Lobby() {
           <Taglines />
         </section>
 
-        <aside className="lobby-bust-cell" aria-hidden="true">
-          <AsciiBust />
+        <aside className="lobby-art-cell" aria-hidden="true">
+          <TypographicField />
         </aside>
       </div>
 
@@ -55,7 +55,7 @@ export function Lobby() {
           flex: 0 0 40%;
           max-width: 40%;
         }
-        .lobby-bust-cell {
+        .lobby-art-cell {
           flex: 0 0 60%;
           max-width: 60%;
           display: flex;
@@ -63,23 +63,24 @@ export function Lobby() {
           justify-content: center;
         }
 
-        /* Single-column collapse below 768px — bust above the wordmark
-           stack, smaller and dimmer per spec. */
+        /* Single-column collapse below 768px — typographic field above
+           the wordmark stack, smaller scale to keep it from dominating. */
         @media (max-width: 767px) {
           .lobby-grid {
             flex-direction: column-reverse;
             align-items: flex-start;
           }
           .lobby-text,
-          .lobby-bust-cell {
+          .lobby-art-cell {
             flex: 0 0 auto;
             max-width: 100%;
             width: 100%;
           }
-          .lobby-bust-cell .lobby-bust {
-            font-size: 7.2px !important;
-            line-height: 10.8px !important;
-            opacity: 0.25 !important;
+          .lobby-art-cell .lobby-tf {
+            font-size: 11px !important;
+            line-height: 13px !important;
+            transform: scale(0.85);
+            transform-origin: top left;
           }
         }
 
