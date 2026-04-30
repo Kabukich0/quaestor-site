@@ -1,0 +1,150 @@
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-04-22T15:27:57.689Z",
+  "experiment": {
+    "title": "Typographic Dot Pulse",
+    "description": "Dots form a character and pulse with noise-driven animation, lifting toward the viewer on hover.",
+    "prompt": "up the z lift amount value to go to 12.\n\ndon't increase the size of the dots on hover. keep them consistent.",
+    "renderer": "p5",
+    "code": "Object.assign(controls, {\n  character: 'Q',\n  dotSize: 5,\n  speed: 1.0,\n  gridSpacing: 5,\n  dotColor: '#1a1817',\n  pulseIntensity: 0.6,\n  trailEffect: true,\n  hoverRadius: 80,\n  zLift: 3.2,\n  ...controls\n});\n\nconst sketch = (p) => {\n  let dots = [];\n  let prevChar = '';\n  let prevSpacing = 0;\n\n  function buildDots() {\n    dots = [];\n    let pg = p.createGraphics(p.width, p.height);\n    pg.pixelDensity(1);\n    pg.background(0);\n    pg.fill(255);\n    pg.noStroke();\n    pg.textAlign(p.CENTER, p.CENTER);\n    pg.textStyle(p.BOLD);\n    let fontSize = Math.min(p.width, p.height) * 0.76;\n    pg.textSize(fontSize);\n    pg.text(controls.character, p.width / 2, p.height / 2);\n    pg.loadPixels();\n\n    let step = Math.max(3, Math.round(controls.gridSpacing));\n    for (let x = 0; x < p.width; x += step) {\n      for (let y = 0; y < p.height; y += step) {\n        let idx = (x + y * p.width) * 4;\n        if (pg.pixels[idx] > 100) {\n          dots.push({\n            x: x + p.random(-step * 0.3, step * 0.3),\n            y: y + p.random(-step * 0.3, step * 0.3),\n            noiseOff: p.random(10000),\n            sizeMult: p.random(0.25, 1.9),\n            z: 0,\n            targetZ: 0\n          });\n        }\n      }\n    }\n\n    pg.remove();\n    prevChar = controls.character;\n    prevSpacing = controls.gridSpacing;\n  }\n\n  p.setup = () => {\n    p.createCanvas(p.windowWidth, p.windowHeight);\n    p.pixelDensity(1);\n    buildDots();\n  };\n\n  p.draw = () => {\n    if (controls.character !== prevChar || controls.gridSpacing !== prevSpacing) {\n      buildDots();\n    }\n\n    if (controls.trailEffect) {\n      p.background(0, 30);\n    } else {\n      p.background(0);\n    }\n\n    let t = p.frameCount * 0.008 * controls.speed;\n    let c = p.color(controls.dotColor);\n    p.noStroke();\n\n    let mx = p.mouseX;\n    let my = p.mouseY;\n    let r = controls.hoverRadius;\n    let lift = controls.zLift;\n\n    for (let d of dots) {\n      let n = p.noise(d.noiseOff + t * 1.1, d.noiseOff * 0.6 + t * 0.55);\n      let pulse = p.map(n, 0, 1, 1.0 - controls.pulseIntensity, 1.0 + controls.pulseIntensity);\n\n      let dx = p.map(p.noise(d.noiseOff + 500, t * 0.35), 0, 1, -2.5, 2.5);\n      let dy = p.map(p.noise(d.noiseOff + 1200, t * 0.35), 0, 1, -2.5, 2.5);\n\n      let px = d.x + dx;\n      let py = d.y + dy;\n\n      let dist = p.dist(mx, my, px, py);\n      let influence = dist < r ? p.map(dist, 0, r, 1.0, 0.0) : 0.0;\n      influence = influence * influence * (3 - 2 * influence);\n\n      d.targetZ = influence * lift;\n      let lerpRate = d.targetZ > d.z ? 0.18 : 0.07;\n      d.z = p.lerp(d.z, d.targetZ, lerpRate);\n\n      // No size scaling from z \u2014 keep dot size consistent\n      let sz = Math.max(0.5, controls.dotSize * d.sizeMult * pulse);\n\n      let cx = p.width / 2;\n      let cy = p.height / 2;\n      let offX = (px - cx) * d.z * 0.04;\n      let offY = (py - cy) * d.z * 0.04;\n\n      let baseAlpha = p.map(n, 0, 1, 50, 255);\n      let alpha = p.min(255, baseAlpha + d.z * 60);\n\n      if (d.z > 0.05) {\n        let shadowAlpha = p.map(d.z, 0, lift, 0, 60);\n        let shadowOffset = d.z * 2.2;\n        p.fill(0, 0, 0, shadowAlpha);\n        p.circle(px + offX + shadowOffset, py + offY + shadowOffset, sz * 0.9);\n      }\n\n      p.fill(p.red(c), p.green(c), p.blue(c), alpha);\n      p.circle(px + offX, py + offY, sz);\n    }\n  };\n\n  p.windowResized = () => {\n    p.resizeCanvas(p.windowWidth, p.windowHeight);\n    buildDots();\n  };\n};\n\nnew p5(sketch);",
+    "controls": {
+      "parameters": [
+        {
+          "name": "character",
+          "label": "Character",
+          "type": "select",
+          "config": {
+            "options": [
+              {
+                "label": "A",
+                "value": "A"
+              },
+              {
+                "label": "B",
+                "value": "B"
+              },
+              {
+                "label": "C",
+                "value": "C"
+              },
+              {
+                "label": "S",
+                "value": "S"
+              },
+              {
+                "label": "Z",
+                "value": "Z"
+              },
+              {
+                "label": "0",
+                "value": "0"
+              },
+              {
+                "label": "&",
+                "value": "&"
+              },
+              {
+                "label": "@",
+                "value": "@"
+              }
+            ]
+          },
+          "defaultValue": "A"
+        },
+        {
+          "name": "dotSize",
+          "label": "Dot Size",
+          "type": "range",
+          "config": {
+            "min": 1,
+            "max": 15,
+            "step": 0.5
+          },
+          "defaultValue": 5
+        },
+        {
+          "name": "gridSpacing",
+          "label": "Grid Spacing",
+          "type": "range",
+          "config": {
+            "min": 3,
+            "max": 20,
+            "step": 1
+          },
+          "defaultValue": 5
+        },
+        {
+          "name": "speed",
+          "label": "Pulse Speed",
+          "type": "range",
+          "config": {
+            "min": 0.1,
+            "max": 4,
+            "step": 0.1
+          },
+          "defaultValue": 1
+        },
+        {
+          "name": "pulseIntensity",
+          "label": "Pulse Intensity",
+          "type": "range",
+          "config": {
+            "min": 0,
+            "max": 1,
+            "step": 0.05
+          },
+          "defaultValue": 0.6
+        },
+        {
+          "name": "hoverRadius",
+          "label": "Hover Radius",
+          "type": "range",
+          "config": {
+            "min": 20,
+            "max": 200,
+            "step": 5
+          },
+          "defaultValue": 80
+        },
+        {
+          "name": "zLift",
+          "label": "Z Lift Amount",
+          "type": "range",
+          "config": {
+            "min": 0,
+            "max": 12,
+            "step": 0.1
+          },
+          "defaultValue": 3.2
+        },
+        {
+          "name": "dotColor",
+          "label": "Dot Color",
+          "type": "color",
+          "config": {
+            "format": "hex"
+          },
+          "defaultValue": "#ffffff"
+        },
+        {
+          "name": "trailEffect",
+          "label": "Trail Effect",
+          "type": "boolean",
+          "config": {},
+          "defaultValue": true
+        }
+      ]
+    },
+    "controlValues": {
+      "character": "Q",
+      "dotSize": 1.5,
+      "gridSpacing": 4,
+      "speed": 4,
+      "pulseIntensity": 0.8,
+      "hoverRadius": 155,
+      "zLift": 12,
+      "dotColor": "#1a1817",
+      "trailEffect": true
+    }
+  }
+}

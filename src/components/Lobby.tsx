@@ -10,9 +10,9 @@
  *
  * Padding follows the spec's clamp(48px, 6vw, 96px).
  */
+import { DeeoArtifact } from "./DeeoArtifact";
 import { NavLinks } from "./NavLinks";
 import { Taglines } from "./Taglines";
-import { TypographicField } from "./TypographicField";
 import { Wordmark } from "./Wordmark";
 
 export function Lobby() {
@@ -30,7 +30,7 @@ export function Lobby() {
         </section>
 
         <aside className="lobby-art-cell" aria-hidden="true">
-          <TypographicField />
+          <DeeoArtifact slug="3d-type-sphere" width="100%" height="100%" hideControls />
         </aside>
       </div>
 
@@ -57,10 +57,18 @@ export function Lobby() {
         }
         .lobby-art-cell {
           flex: 0 0 60%;
-          max-width: 60%;
+          max-width: min(60%, 720px);
+          height: min(60vw, 720px);
+          max-height: 720px;
           display: flex;
           align-items: center;
           justify-content: center;
+          opacity: 1;
+        }
+        .deeo-artifact-frame {
+          display: block;
+          border: 0;
+          background: transparent;
         }
 
         /* Tablet: keep the bust, but let it breathe above the copy. */
@@ -75,11 +83,8 @@ export function Lobby() {
             max-width: 100%;
             width: 100%;
           }
-          .lobby-art-cell .lobby-tf {
-            font-size: 10px !important;
-            line-height: 12px !important;
-            transform: scale(0.78);
-            transform-origin: top left;
+          .lobby-art-cell {
+            height: min(70vw, 520px);
           }
         }
 

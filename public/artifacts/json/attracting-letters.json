@@ -1,0 +1,128 @@
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-04-28T01:54:06.619Z",
+  "experiment": {
+    "title": "Circle Typography System",
+    "description": "A grid of lettered circles that react to cursor proximity with push/attract forces and colorful wobble effects.",
+    "prompt": "position spread doesn't work",
+    "renderer": "p5",
+    "code": "Object.assign(controls, {\n  textPreset: 'QUAESTOR',\n  circleCount: 120,\n  circleSize: 60,\n  spread: 20,\n  hoverRadius: 150,\n  pushForce: 80,\n  fontSize: 20,\n  outlineWeight: 2,\n  wobbleIntensity: 4,\n  attractMode: false\n});\n\nconst sketch = (p) => {\n  let circles = [];\n  let lastCircleCount = -1;\n  let lastTextPreset = '';\n  let lastSpread = -1;\n\n  class Circle {\n    constructor(bx, by, ch) {\n      this.bx = bx;\n      this.by = by;\n      this.x  = bx;\n      this.y  = by;\n      this.ch = ch;\n      this.vx = 0;\n      this.vy = 0;\n      this.scale = 1;\n      this.sat   = 0;\n      this.hue   = p.random(0, 360);\n      this.phase = p.random(0, 360);\n      this.nox   = p.random(0, 1000);\n      this.noy   = p.random(2000, 3000);\n    }\n\n    update(t) {\n      const wobble = controls.wobbleIntensity;\n      const wx = (p.noise(this.nox + t) - 0.5) * 2 * wobble;\n      const wy = (p.noise(this.noy + t) - 0.5) * 2 * wobble;\n\n      let tx = this.bx + wx;\n      let ty = this.by + wy;\n\n      const dx   = this.bx - p.mouseX;\n      const dy   = this.by - p.mouseY;\n      const dist = p.sqrt(dx * dx + dy * dy);\n      const hr   = controls.hoverRadius;\n      const attract = controls.attractMode;\n\n      let tScale = 1;\n      let tSat   = 0;\n      let tHue   = this.hue;\n\n      if (dist < hr && dist > 0.01) {\n        const norm = dist / hr;\n        if (norm < 0.5) {\n          const f = 1 - norm / 0.5;\n          tScale = 1 + f * 0.75;\n          tSat   = 70 + f * 30;\n          tHue   = (this.phase + p.frameCount * 2.2) % 360;\n        } else {\n          const f   = (1 - norm) / 0.5;\n          const ang = p.atan2(dy, dx);\n          const dir = attract ? -1 : 1;\n          tx += p.cos(ang) * f * controls.pushForce * dir;\n          ty += p.sin(ang) * f * controls.pushForce * dir;\n          tSat = f * 48;\n          tHue = (this.phase + p.frameCount * 1.1) % 360;\n        }\n      }\n\n      this.scale += (tScale - this.scale) * 0.14;\n      this.sat   += (tSat   - this.sat)   * 0.1;\n\n      let dHue = tHue - this.hue;\n      if (dHue >  180) dHue -= 360;\n      if (dHue < -180) dHue += 360;\n      this.hue = ((this.hue + dHue * 0.07) + 360) % 360;\n\n      this.vx = (this.vx + (tx - this.x) * 0.14) * 0.72;\n      this.vy = (this.vy + (ty - this.y) * 0.14) * 0.72;\n      this.x += this.vx;\n      this.y += this.vy;\n    }\n\n    draw() {\n      const sz = controls.circleSize * this.scale;\n      p.push();\n      p.translate(this.x, this.y);\n\n      p.colorMode(p.HSB, 360, 100, 100);\n      p.fill(this.hue, this.sat, 100);\n      p.strokeWeight(controls.outlineWeight);\n      p.stroke(0, 0, 0);\n      p.circle(0, 0, sz);\n\n      p.colorMode(p.RGB, 255);\n      p.fill(0);\n      p.noStroke();\n      p.textAlign(p.CENTER, p.CENTER);\n      p.textStyle(p.BOLD);\n      p.textSize(controls.fontSize);\n      p.text(this.ch, 0, 1);\n\n      p.pop();\n    }\n  }\n\n  function buildGrid() {\n    circles = [];\n    const str    = controls.textPreset || 'QUAESTOR';\n    const count  = Math.min(Math.floor(controls.circleCount), 200);\n    const spread = controls.spread;\n    const aspect = p.width / p.height;\n    const cols   = Math.ceil(Math.sqrt(count * aspect));\n    const rows   = Math.ceil(count / cols);\n    const cw     = p.width  / cols;\n    const ch     = p.height / rows;\n\n    let ci = 0, n = 0;\n    for (let r = 0; r < rows && n < count; r++) {\n      for (let c = 0; c < cols && n < count; c++) {\n        const bx = cw * (c + 0.5) + p.random(-spread, spread);\n        const by = ch * (r + 0.5) + p.random(-spread, spread);\n        circles.push(new Circle(bx, by, str[ci % str.length]));\n        ci++; n++;\n      }\n    }\n\n    lastCircleCount = Math.min(Math.floor(controls.circleCount), 200);\n    lastTextPreset  = controls.textPreset;\n    lastSpread      = controls.spread;\n  }\n\n  p.setup = () => {\n    p.createCanvas(p.windowWidth, p.windowHeight);\n    buildGrid();\n  };\n\n  p.draw = () => {\n    const currentCount  = Math.min(Math.floor(controls.circleCount), 200);\n    const currentPreset = controls.textPreset;\n    const currentSpread = controls.spread;\n    if (\n      currentCount  !== lastCircleCount ||\n      currentPreset !== lastTextPreset  ||\n      currentSpread !== lastSpread\n    ) {\n      buildGrid();\n    }\n\n    p.colorMode(p.RGB);\n    p.background(18);\n    const t = p.millis() * 0.0005;\n    for (const c of circles) {\n      c.update(t);\n      c.draw();\n    }\n  };\n\n  p.mousePressed = () => buildGrid();\n\n  p.windowResized = () => {\n    p.resizeCanvas(p.windowWidth, p.windowHeight);\n    buildGrid();\n  };\n};\n\nnew p5(sketch);",
+    "controls": {
+      "parameters": [
+        {
+          "name": "textPreset",
+          "label": "Text Preset",
+          "type": "select",
+          "config": {
+            "options": [
+              {
+                "label": "CREATIVE",
+                "value": "CREATIVE"
+              },
+              {
+                "label": "HELLO WORLD",
+                "value": "HELLO WORLD"
+              },
+              {
+                "label": "ABCDEFGHIJ",
+                "value": "ABCDEFGHIJ"
+              },
+              {
+                "label": "0123456789",
+                "value": "0123456789"
+              },
+              {
+                "label": "\u25cf\u25b2\u25a0",
+                "value": "\u25cf\u25b2\u25a0"
+              }
+            ]
+          },
+          "defaultValue": "CREATIVE"
+        },
+        {
+          "name": "circleCount",
+          "label": "Circle Count",
+          "type": "range",
+          "config": {
+            "min": 10,
+            "max": 200,
+            "step": 1
+          },
+          "defaultValue": 120
+        },
+        {
+          "name": "circleSize",
+          "label": "Circle Size",
+          "type": "range",
+          "config": {
+            "min": 10,
+            "max": 120,
+            "step": 1
+          },
+          "defaultValue": 60
+        },
+        {
+          "name": "spread",
+          "label": "Position Spread",
+          "type": "range",
+          "config": {
+            "min": 0,
+            "max": 200,
+            "step": 1
+          },
+          "defaultValue": 20
+        },
+        {
+          "name": "hoverRadius",
+          "label": "Hover Radius",
+          "type": "range",
+          "config": {
+            "min": 20,
+            "max": 400,
+            "step": 5
+          },
+          "defaultValue": 150
+        },
+        {
+          "name": "pushForce",
+          "label": "Push Force",
+          "type": "range",
+          "config": {
+            "min": 0,
+            "max": 200,
+            "step": 1
+          },
+          "defaultValue": 80
+        },
+        {
+          "name": "wobbleIntensity",
+          "label": "Wobble Intensity",
+          "type": "range",
+          "config": {
+            "min": 0,
+            "max": 20,
+            "step": 0.5
+          },
+          "defaultValue": 4
+        },
+        {
+          "name": "attractMode",
+          "label": "Attract Mode",
+          "type": "boolean",
+          "config": {},
+          "defaultValue": false
+        }
+      ]
+    },
+    "controlValues": {
+      "textPreset": "QUAESTOR",
+      "circleCount": 81,
+      "circleSize": 34,
+      "spread": 46,
+      "hoverRadius": 300,
+      "pushForce": 200,
+      "wobbleIntensity": 14,
+      "attractMode": true
+    }
+  }
+}

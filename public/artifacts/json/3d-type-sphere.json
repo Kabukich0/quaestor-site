@@ -1,0 +1,111 @@
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-04-15T12:43:31.594Z",
+  "experiment": {
+    "title": "Text Character Sphere",
+    "description": "An interactive sphere composed of animated text characters with drag rotation and depth-based scaling.",
+    "prompt": "ability to type in a custom 'string' for the character set",
+    "renderer": "three",
+    "code": "Object.assign(controls, {\n  charSet: 'numbers',\n  charCount: 520,\n  rotationSpeed: 0.0012,\n  charSize: 0.42,\n  glowColor: '#7d2a1f',\n  autoRotate: true,\n  ...controls,\n});\n\nconst scene = new THREE.Scene();\nscene.background = null;\n\nconst camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);\ncamera.position.z = 7.2;\n\nconst renderer = new THREE.WebGLRenderer({ antialias: true });\nrenderer.setSize(window.innerWidth, window.innerHeight);\nrenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));\ndocument.body.appendChild(renderer.domElement);\n\nconst charSets = {\n  numbers:     '0123456789',\n  letters:     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',\n  binary:      '01',\n  hexadecimal: '0123456789ABCDEF',\n  matrix:      '\uff66\uff67\uff69\uff6a\uff6b\uff6c\uff6d\uff6e\uff6f\uff71\uff72\uff73\uff74\uff75\uff76\uff77\uff78\uff7a\uff7b\uff7c\uff7d\uff7f\uff80\uff81\uff82\uff83\uff85\uff86\uff87\uff89\uff8a\uff8b\uff8c\uff8d\uff8e\uff8f\uff90\uff91\uff92\uff93\uff94\uff95\uff96\uff97\uff98\uff99\uff9a\uff9b\uff9c\uff9d',\n  symbols:     '@#$%&*!?+=~<>{}[]',\n  custom:      'AUDITUS\u00b7CUSTODIA\u00b7MANDATUM\u00b7LEDGER\u00b7PROBATIO\u00b7SIGILLUM\u00b7QUAESTOR\u00b7IMPERIUM\u00b7SCRIPTUM\u00b7VERITAS\u00b7CATENA\u00b7OBSERVO',\n};\n\n// Custom character input overlay\nconst customInput = document.createElement('input');\ncustomInput.type = 'text';\ncustomInput.value = 'AUDITUS\u00b7CUSTODIA\u00b7MANDATUM\u00b7LEDGER\u00b7PROBATIO\u00b7SIGILLUM\u00b7QUAESTOR\u00b7IMPERIUM\u00b7SCRIPTUM\u00b7VERITAS\u00b7CATENA\u00b7OBSERVO';\ncustomInput.placeholder = 'Type your characters\u2026';\nObject.assign(customInput.style, {\n  position: 'fixed',\n  bottom: '72px',\n  left: '50%',\n  transform: 'translateX(-50%)',\n  background: 'rgba(0,0,0,0.75)',\n  color: '#fff',\n  border: '1px solid rgba(255,255,255,0.35)',\n  borderRadius: '8px',\n  padding: '9px 18px',\n  fontSize: '20px',\n  letterSpacing: '5px',\n  outline: 'none',\n  display: 'none',\n  zIndex: '1000',\n  minWidth: '280px',\n  textAlign: 'center',\n  fontFamily: 'monospace',\n  boxShadow: '0 0 18px rgba(255,255,255,0.1)',\n});\ndocument.body.appendChild(customInput);\n_cleanup.signal.addEventListener('abort', () => customInput.remove());\n\nfunction createCharTexture(char, color) {\n  const canvas = document.createElement('canvas');\n  canvas.width = 64;\n  canvas.height = 64;\n  const ctx = canvas.getContext('2d');\n  ctx.clearRect(0, 0, 64, 64);\n  ctx.fillStyle = color;\n  ctx.font = 'bold 44px monospace';\n  ctx.textAlign = 'center';\n  ctx.textBaseline = 'middle';\n  ctx.fillText(char, 32, 32);\n  return new THREE.CanvasTexture(canvas);\n}\n\nfunction fibonacciSphere(samples, radius) {\n  const pts = [];\n  const goldenAngle = Math.PI * (3 - Math.sqrt(5));\n  for (let i = 0; i < samples; i++) {\n    const y = 1 - (i / (samples - 1)) * 2;\n    const r = Math.sqrt(1 - y * y);\n    const theta = goldenAngle * i;\n    pts.push(new THREE.Vector3(Math.cos(theta) * r * radius, y * radius, Math.sin(theta) * r * radius));\n  }\n  return pts;\n}\n\nconst SPHERE_RADIUS = 3;\nconst sphereGroup = new THREE.Group();\nscene.add(sphereGroup);\n\nlet lastCharSet = '';\nlet lastCount = 0;\nlet lastColor = '';\nlet lastCustomChars = '';\nconst _wp = new THREE.Vector3();\n\nfunction getActiveChars() {\n  if (controls.charSet === 'custom') {\n    return customInput.value.trim() || '?';\n  }\n  return charSets[controls.charSet] || charSets.numbers;\n}\n\nfunction buildSphere() {\n  sphereGroup.children.slice().forEach(child => {\n    child.material.map.dispose();\n    child.material.dispose();\n    sphereGroup.remove(child);\n  });\n\n  const chars = getActiveChars();\n  const points = fibonacciSphere(controls.charCount, SPHERE_RADIUS);\n\n  points.forEach(pos => {\n    const char = chars[Math.floor(Math.random() * chars.length)];\n    const tex = createCharTexture(char, controls.glowColor);\n    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });\n    const sprite = new THREE.Sprite(mat);\n    sprite.position.copy(pos);\n    const depth = (pos.z / SPHERE_RADIUS + 1) * 0.5;\n    sprite.scale.setScalar(controls.charSize * (0.62 + depth * 1.6) * 3.2);\n    sprite.material.opacity = 0.55 + depth * 0.45;\n    sphereGroup.add(sprite);\n  });\n\n  lastCharSet = controls.charSet;\n  lastCount = controls.charCount;\n  lastColor = controls.glowColor;\n  lastCustomChars = customInput.value;\n}\n\nbuildSphere();\n\nlet isDragging = false;\nlet prevMouse = { x: 0, y: 0 };\nlet velX = 0, velY = 0;\n\nrenderer.domElement.addEventListener('mousedown', e => {\n  isDragging = true;\n  prevMouse = { x: e.clientX, y: e.clientY };\n  velX = velY = 0;\n}, { signal: _cleanup.signal });\n\nwindow.addEventListener('mousemove', e => {\n  if (!isDragging) return;\n  const dx = e.clientX - prevMouse.x;\n  const dy = e.clientY - prevMouse.y;\n  velY = dx * 0.008;\n  velX = dy * 0.008;\n  sphereGroup.rotation.y += velY;\n  sphereGroup.rotation.x += velX;\n  prevMouse = { x: e.clientX, y: e.clientY };\n}, { signal: _cleanup.signal });\n\nwindow.addEventListener('mouseup', () => { isDragging = false; }, { signal: _cleanup.signal });\n\nfunction animate() {\n  requestAnimationFrame(animate);\n\n  // Show / hide custom input\n  customInput.style.display = controls.charSet === 'custom' ? 'block' : 'none';\n\n  const customCharsChanged = controls.charSet === 'custom' && customInput.value !== lastCustomChars;\n\n  if (\n    controls.charSet !== lastCharSet ||\n    controls.charCount !== lastCount ||\n    controls.glowColor !== lastColor ||\n    customCharsChanged\n  ) {\n    buildSphere();\n  }\n\n  if (controls.autoRotate && !isDragging) {\n    sphereGroup.rotation.y += controls.rotationSpeed;\n    sphereGroup.rotation.x += controls.rotationSpeed * 0.25;\n  } else if (!isDragging) {\n    velX *= 0.96;\n    velY *= 0.96;\n    sphereGroup.rotation.x += velX;\n    sphereGroup.rotation.y += velY;\n  }\n\n  const baseSize = controls.charSize;\n  sphereGroup.children.forEach(sprite => {\n    sprite.getWorldPosition(_wp);\n    const depth = (_wp.z / SPHERE_RADIUS + 1) * 0.5;\n    sprite.scale.setScalar(baseSize * (0.62 + depth * 1.6) * 3.2);\n    sprite.material.opacity = 0.55 + depth * 0.45;\n  });\n\n  renderer.render(scene, camera);\n}\n\nwindow.addEventListener('resize', () => {\n  camera.aspect = window.innerWidth / window.innerHeight;\n  camera.updateProjectionMatrix();\n  renderer.setSize(window.innerWidth, window.innerHeight);\n}, { signal: _cleanup.signal });\n\nanimate();\n",
+    "controls": {
+      "parameters": [
+        {
+          "name": "charSet",
+          "label": "Character Set",
+          "type": "select",
+          "config": {
+            "options": [
+              {
+                "label": "Numbers",
+                "value": "numbers"
+              },
+              {
+                "label": "Letters",
+                "value": "letters"
+              },
+              {
+                "label": "Binary",
+                "value": "binary"
+              },
+              {
+                "label": "Hexadecimal",
+                "value": "hexadecimal"
+              },
+              {
+                "label": "Matrix",
+                "value": "matrix"
+              },
+              {
+                "label": "Symbols",
+                "value": "symbols"
+              },
+              {
+                "label": "Custom\u2026",
+                "value": "custom"
+              }
+            ]
+          },
+          "defaultValue": "numbers"
+        },
+        {
+          "name": "charCount",
+          "label": "Character Count",
+          "type": "range",
+          "config": {
+            "min": 50,
+            "max": 1200,
+            "step": 10
+          },
+          "defaultValue": 500
+        },
+        {
+          "name": "charSize",
+          "label": "Character Size",
+          "type": "range",
+          "config": {
+            "min": 0.05,
+            "max": 0.6,
+            "step": 0.01
+          },
+          "defaultValue": 0.22
+        },
+        {
+          "name": "glowColor",
+          "label": "Character Color",
+          "type": "color",
+          "config": {
+            "format": "hex"
+          },
+          "defaultValue": "#ffffff"
+        },
+        {
+          "name": "rotationSpeed",
+          "label": "Rotation Speed",
+          "type": "range",
+          "config": {
+            "min": 0,
+            "max": 0.02,
+            "step": 0.0005
+          },
+          "defaultValue": 0.003
+        },
+        {
+          "name": "autoRotate",
+          "label": "Auto Rotate",
+          "type": "boolean",
+          "config": {},
+          "defaultValue": true
+        }
+      ]
+    },
+    "controlValues": {
+      "charSet": "custom",
+      "charCount": 520,
+      "charSize": 0.42,
+      "glowColor": "#7d2a1f",
+      "rotationSpeed": 0.0012,
+      "autoRotate": true,
+      "customText": "AUDITUS\u00b7CUSTODIA\u00b7MANDATUM\u00b7LEDGER\u00b7PROBATIO\u00b7SIGILLUM\u00b7QUAESTOR\u00b7IMPERIUM\u00b7SCRIPTUM\u00b7VERITAS\u00b7CATENA\u00b7OBSERVO"
+    }
+  }
+}
