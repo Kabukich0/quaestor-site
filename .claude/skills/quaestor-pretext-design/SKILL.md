@@ -41,6 +41,30 @@ Casual visitors see only Layer 0-2. Technical visitors descend.
   reflows on hover
 - Kinetic typography on layer transitions
 
+## Reference implementations
+
+Before writing any Pretext-driven component, READ the relevant
+reference file VERBATIM. Do not skim, do not glance — read
+fully. The somnai-demos source files are the canonical patterns
+for this codebase.
+
+| Use case                          | Reference file |
+|-----------------------------------|----------------|
+| Multi-line text reflow around floating obstacles | reference/somnai-demos/the-editorial-engine.html (and its sibling .ts/.js) |
+| Brightness-driven typographic ASCII art | reference/somnai-demos/variable-typographic-ascii.html |
+| Optimal text justification (Knuth-Plass) | reference/somnai-demos/justification-comparison.html |
+| Pretext API canonical surface | reference/pretext-api.md |
+
+When implementing a Quaestor component:
+  1. Identify which reference applies
+  2. Read the reference file fully
+  3. Crib STRUCTURE — control flow, RAF loop shape, prepare/
+     layout call ordering
+  4. ADAPT content — replace demo text with Quaestor copy,
+     replace demo aesthetics with locked Quaestor palette
+  5. Refuse to write Pretext code that contradicts the
+     reference patterns. If unclear, ask before improvising.
+
 ## Anti-patterns (refuse to generate)
 - Inter font, Geist, Helvetica, any sans-serif used as primary face
 - Purple/violet gradients
