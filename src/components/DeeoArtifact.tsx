@@ -103,20 +103,6 @@ export function DeeoArtifact({
   // artifact code with the expected globals (THREE/p5) and keeps third-party
   // canvases, listeners, and runtime cleanup outside the page's React tree.
   const srcDoc = useMemo(() => buildFrameSrcDoc(slug, hideControls), [slug, hideControls]);
-  const sphereWords = [
-    "AUDITUS",
-    "CUSTODIA",
-    "MANDATUM",
-    "LEDGER",
-    "PROBATIO",
-    "SIGILLUM",
-    "QUAESTOR",
-    "IMPERIUM",
-    "SCRIPTUM",
-    "VERITAS",
-    "CATENA",
-    "OBSERVO",
-  ];
 
   return (
     <div className="deeo-artifact" style={{ width, height }}>
@@ -126,21 +112,6 @@ export function DeeoArtifact({
         srcDoc={srcDoc}
         sandbox="allow-scripts allow-same-origin"
       />
-      {slug === "3d-type-sphere" ? (
-        <div className="deeo-sphere-fallback" aria-hidden="true">
-          {sphereWords.map((word, index) => (
-            <span
-              key={word}
-              style={{
-                ["--i" as string]: index,
-                ["--z" as string]: index % 3 === 0 ? 82 : index % 3 === 1 ? -50 : 24,
-              }}
-            >
-              {word}
-            </span>
-          ))}
-        </div>
-      ) : null}
       <style>{`
         .deeo-artifact {
           position: relative;
@@ -154,39 +125,6 @@ export function DeeoArtifact({
           height: 100%;
           border: 0;
           background: transparent;
-        }
-        .deeo-sphere-fallback {
-          position: absolute;
-          inset: 12%;
-          display: block;
-          transform-style: preserve-3d;
-          perspective: 900px;
-          animation: deeo-quaestor-orbit 42s linear infinite;
-          pointer-events: none;
-          mix-blend-mode: multiply;
-        }
-        .deeo-sphere-fallback span {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          font-family: var(--font-mono);
-          font-size: clamp(10px, 1vw, 15px);
-          letter-spacing: 0.16em;
-          color: var(--color-oxblood);
-          opacity: 0.74;
-          white-space: nowrap;
-          transform:
-            rotateY(calc(var(--i) * 31deg))
-            rotateX(calc(var(--i) * 17deg))
-            translateZ(calc(var(--z) * 1px))
-            translate(-50%, -50%);
-        }
-        @keyframes deeo-quaestor-orbit {
-          from { transform: rotateX(-10deg) rotateY(0deg); }
-          to { transform: rotateX(-10deg) rotateY(360deg); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .deeo-sphere-fallback { animation: none; }
         }
       `}</style>
     </div>

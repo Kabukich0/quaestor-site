@@ -10,8 +10,8 @@
  *
  * Padding follows the spec's clamp(48px, 6vw, 96px).
  */
-import { DeeoArtifact } from "./DeeoArtifact";
 import { NavLinks } from "./NavLinks";
+import OctavianBust from "./OctavianBust";
 import { Taglines } from "./Taglines";
 import { Wordmark } from "./Wordmark";
 
@@ -30,7 +30,7 @@ export function Lobby() {
         </section>
 
         <aside className="lobby-art-cell" aria-hidden="true">
-          <DeeoArtifact slug="3d-type-sphere" width="100%" height="100%" hideControls />
+          <OctavianBust />
         </aside>
       </div>
 
@@ -64,11 +64,6 @@ export function Lobby() {
           align-items: center;
           justify-content: center;
           opacity: 1;
-        }
-        .deeo-artifact-frame {
-          display: block;
-          border: 0;
-          background: transparent;
         }
 
         /* Tablet: keep the bust, but let it breathe above the copy. */
