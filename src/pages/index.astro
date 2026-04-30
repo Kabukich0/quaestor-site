@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import { Lobby } from "../components/Lobby";
+import { Thesis } from "../components/Thesis";
 
 const title = "Quaestor";
 const description =
@@ -9,4 +10,5 @@ const description =
 
 <Base title={title} description={description}>
   <Lobby client:load />
+  <Thesis client:load />
 </Base>
