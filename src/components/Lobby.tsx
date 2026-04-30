@@ -6,7 +6,7 @@
  * Layout:
  *   - 100vh full viewport
  *   - flex two-column at >=768px: 40% wordmark stack | 60% typo field
- *   - single-column collapse at <768px: field above, smaller scale
+ *   - phone collapse below 600px: no bust, centered wordmark stack
  *
  * Padding follows the spec's clamp(48px, 6vw, 96px).
  */
@@ -39,7 +39,7 @@ export function Lobby() {
           position: relative;
           min-height: 100vh;
           background: var(--color-cream);
-          padding-inline: clamp(48px, 6vw, 96px);
+          padding-inline: clamp(32px, 6vw, 96px);
           padding-block: clamp(48px, 6vw, 96px);
           box-sizing: border-box;
           overflow: hidden;
@@ -49,7 +49,7 @@ export function Lobby() {
           align-items: center;
           justify-content: space-between;
           min-height: calc(100vh - clamp(96px, 12vw, 192px));
-          gap: clamp(24px, 4vw, 64px);
+          gap: clamp(32px, 4vw, 64px);
         }
         .lobby-text {
           flex: 0 0 40%;
@@ -63,8 +63,7 @@ export function Lobby() {
           justify-content: center;
         }
 
-        /* Single-column collapse below 768px — typographic field above
-           the wordmark stack, smaller scale to keep it from dominating. */
+        /* Tablet: keep the bust, but let it breathe above the copy. */
         @media (max-width: 767px) {
           .lobby-grid {
             flex-direction: column-reverse;
@@ -77,10 +76,30 @@ export function Lobby() {
             width: 100%;
           }
           .lobby-art-cell .lobby-tf {
-            font-size: 11px !important;
-            line-height: 13px !important;
-            transform: scale(0.85);
+            font-size: 10px !important;
+            line-height: 12px !important;
+            transform: scale(0.78);
             transform-origin: top left;
+          }
+        }
+
+        /* Phone: the bust becomes noise below 600px. Ship the confident
+           centered inscription instead of forcing 7px typography. */
+        @media (max-width: 599px) {
+          .lobby-shell {
+            padding-inline: 32px;
+            padding-block: 64px;
+          }
+          .lobby-grid {
+            min-height: calc(100vh - 128px);
+            align-items: center;
+            justify-content: center;
+          }
+          .lobby-text {
+            text-align: center;
+          }
+          .lobby-art-cell {
+            display: none;
           }
         }
 

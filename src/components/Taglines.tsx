@@ -25,7 +25,7 @@ export function Taglines() {
 
       <div
         className="lobby-tagline-english-wrap"
-        style={{ marginTop: "32px" }}
+        style={{ marginTop: "32px", cursor: "text" }}
       >
         <span aria-hidden="true" className="lobby-hairline" />
         <p
@@ -39,6 +39,7 @@ export function Taglines() {
             color: "var(--color-muted)",
             marginTop: "16px",
             lineHeight: 1.5,
+            cursor: "text",
           }}
         >
           The audit office for the machine economy.
@@ -48,7 +49,7 @@ export function Taglines() {
       <style>{`
         .lobby-tagline-latin {
           opacity: 0;
-          animation: lobby-fade-in 600ms 400ms var(--ease-out-expo) both;
+          animation: lobby-fade-in 620ms 360ms var(--ease-out-quint) both;
           will-change: opacity;
         }
         .lobby-hairline {
@@ -56,12 +57,12 @@ export function Taglines() {
           width: 0px;
           height: 1px;
           background: var(--color-oxblood);
-          animation: lobby-hairline-grow 800ms 1000ms var(--ease-out-expo) both;
+          animation: lobby-hairline-grow 700ms 860ms var(--ease-out-quint) both;
           will-change: width;
         }
         .lobby-tagline-english {
           opacity: 0;
-          animation: lobby-fade-in 600ms 1000ms var(--ease-out-expo) both;
+          animation: lobby-fade-in 620ms 900ms var(--ease-out-quint) both;
           will-change: opacity;
         }
         @keyframes lobby-fade-in {

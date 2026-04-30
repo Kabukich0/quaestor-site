@@ -87,6 +87,7 @@
      out-set. Out-expo is the wordmark/tagline default. */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
@@ -100,6 +101,32 @@ body {
   font-family: var(--font-mono);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-oxblood) var(--color-cream);
+}
+
+body {
+  margin: 0;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-oxblood) 18%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-oxblood);
+  border: 3px solid var(--color-cream);
 }
 
 /* Reduced-motion blanket: a single fade-in for everything, no spatial
