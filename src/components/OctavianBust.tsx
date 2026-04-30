@@ -28,10 +28,10 @@ export default function OctavianBust() {
         disable-zoom
         disable-pan
         disable-tap
-        shadow-intensity="0.5"
+        shadow-intensity="0"
         shadow-softness="0.85"
-        environment-image="neutral"
-        exposure="1.05"
+        environment-image="legacy"
+        exposure="3.5"
         camera-orbit="0deg 88deg 420m"
         camera-target="0m 78m 0m"
         min-camera-orbit="auto auto 100m"
