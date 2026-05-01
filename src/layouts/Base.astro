@@ -13,6 +13,12 @@ const {
   title = "Quaestor — the audit office for the machine economy",
   description = "Local-first agent payments. Mandate JWTs, BLAKE3-chained ledger, on-device policy LLM.",
 } = Astro.props;
+
+const SITE_URL = "https://quaestor-site.vercel.app";
+const OG_IMAGE = `${SITE_URL}/og-image.png`;
+const OG_TITLE = "Quaestor";
+const OG_DESCRIPTION =
+  "The audit office for the machine economy. Non-custodial mandate engine for AI agent payments.";
 ---
 
 <!doctype html>
@@ -22,6 +28,18 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light only" />
     <meta name="description" content={description} />
+
+    <meta property="og:title" content={OG_TITLE} />
+    <meta property="og:description" content={OG_DESCRIPTION} />
+    <meta property="og:image" content={OG_IMAGE} />
+    <meta property="og:url" content={SITE_URL} />
+    <meta property="og:type" content="website" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={OG_TITLE} />
+    <meta name="twitter:description" content="The audit office for the machine economy." />
+    <meta name="twitter:image" content={OG_IMAGE} />
+
     <link
       rel="preload"
       href="/fonts/cormorant-infant/cormorant-infant-latin-400-normal.woff2"
