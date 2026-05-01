@@ -1,12 +1,73 @@
 /**
  * Latin tagline + English tagline + the oxblood hairline divider.
- * Both fade in on a delay; the hairline grows from 0px to 32px width.
- * All durations come from the spec and respect prefers-reduced-motion
- * via the global cascade in theme.css.
+ *
+ * Animation timing (all client-side via anime.js, single intro timeline):
+ *   350–900ms:  hairline draws from 0 → 32px width
+ *   700–1140ms: Latin tagline word stagger fade-up (3 words, 80ms apart)
+ *   1100–1900ms: English caption typewriter (per-char 18ms stagger)
+ *
+ * Reduced-motion: every element snaps to its final state on mount.
  */
+import { useEffect, useRef } from "react";
+import { animate, stagger } from "animejs";
+
+const LATIN = "Qui custodiet ipsos custodes.";
+const ENGLISH = "The audit office for the machine economy.";
+
 export function Taglines() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+
+    const latinWords = root.querySelectorAll<HTMLElement>(".lobby-latin-word");
+    const hairline = root.querySelector<HTMLElement>(".lobby-hairline");
+    const englishChars = root.querySelectorAll<HTMLElement>(".lobby-english-char");
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      latinWords.forEach((el) => {
+        el.style.opacity = "1";
+        el.style.transform = "none";
+      });
+      if (hairline) hairline.style.width = "32px";
+      englishChars.forEach((el) => {
+        el.style.opacity = "1";
+      });
+      return;
+    }
+
+    if (hairline) {
+      animate(hairline, {
+        width: [0, 32],
+        delay: 350,
+        duration: 550,
+        ease: "outQuart",
+      });
+    }
+
+    animate(latinWords, {
+      opacity: [0, 1],
+      translateY: [4, 0],
+      delay: stagger(80, { start: 700 }),
+      duration: 360,
+      ease: "outQuart",
+    });
+
+    animate(englishChars, {
+      opacity: [0, 1],
+      delay: stagger(18, { start: 1100 }),
+      duration: 220,
+      ease: "outQuad",
+    });
+  }, []);
+
+  const latinWords = LATIN.split(" ");
+  const englishChars = Array.from(ENGLISH);
+
   return (
-    <div className="lobby-taglines">
+    <div ref={ref} className="lobby-taglines">
       <p
         className="lobby-tagline-latin"
         style={{
@@ -20,7 +81,22 @@ export function Taglines() {
           lineHeight: 1.3,
         }}
       >
-        Qui custodiet ipsos custodes.
+        {latinWords.map((word, i) => (
+          <span
+            key={`${word}-${i}`}
+            className="lobby-latin-word"
+            style={{
+              display: "inline-block",
+              opacity: 0,
+              transform: "translateY(4px)",
+              willChange: "transform, opacity",
+              whiteSpace: "pre",
+            }}
+          >
+            {word}
+            {i < latinWords.length - 1 ? " " : ""}
+          </span>
+        ))}
       </p>
 
       <div
@@ -42,45 +118,30 @@ export function Taglines() {
             cursor: "text",
           }}
         >
-          The audit office for the machine economy.
+          {englishChars.map((ch, i) => (
+            <span
+              key={i}
+              className="lobby-english-char"
+              style={{
+                display: "inline-block",
+                opacity: 0,
+                whiteSpace: "pre",
+                willChange: "opacity",
+              }}
+            >
+              {ch}
+            </span>
+          ))}
         </p>
       </div>
 
       <style>{`
-        .lobby-tagline-latin {
-          opacity: 0;
-          animation: lobby-fade-in 620ms 360ms var(--ease-out-quint) both;
-          will-change: opacity;
-        }
         .lobby-hairline {
           display: block;
           width: 0px;
           height: 1px;
           background: var(--color-oxblood);
-          animation: lobby-hairline-grow 700ms 860ms var(--ease-out-quint) both;
           will-change: width;
-        }
-        .lobby-tagline-english {
-          opacity: 0;
-          animation: lobby-fade-in 620ms 900ms var(--ease-out-quint) both;
-          will-change: opacity;
-        }
-        @keyframes lobby-fade-in {
-          to { opacity: 1; }
-        }
-        @keyframes lobby-hairline-grow {
-          to { width: 32px; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .lobby-tagline-latin,
-          .lobby-tagline-english {
-            opacity: 1 !important;
-            animation: none !important;
-          }
-          .lobby-hairline {
-            width: 32px !important;
-            animation: none !important;
-          }
         }
       `}</style>
     </div>

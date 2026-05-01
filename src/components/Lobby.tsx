@@ -1,26 +1,60 @@
 /**
- * Layer 0 / Lobby — composes Wordmark, Taglines, TypographicField,
- * NavLinks into the locked two-column layout. Above-the-fold only;
- * no scroll behaviour, no other interaction surface.
+ * Layer 0 / Lobby — composes Wordmark, Taglines, OctavianBust,
+ * MossBackdrop, NavLinks, and ScrollCue into the locked two-column
+ * layout. Holds the first 100vh; on scroll the grid lifts and dims
+ * so Layer 1 (Thesis) takes over without a hard cut.
  *
  * Layout:
  *   - 100vh full viewport
- *   - flex two-column at >=768px: 40% wordmark stack | 60% typo field
+ *   - flex two-column at >=768px: 40% wordmark stack | 60% bust
  *   - phone collapse below 600px: no bust, centered wordmark stack
  *
- * Padding follows the spec's clamp(48px, 6vw, 96px).
+ * Padding follows the spec's clamp(48px, 6vw, 96px). Scroll handler
+ * is rAF-throttled and short-circuits when prefers-reduced-motion.
  */
+import { useEffect, useRef } from "react";
+import MossBackdrop from "./MossBackdrop";
 import { NavLinks } from "./NavLinks";
 import OctavianBust from "./OctavianBust";
+import ScrollCue from "./ScrollCue";
 import { Taglines } from "./Taglines";
 import { Wordmark } from "./Wordmark";
 
 export function Lobby() {
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
+    let raf = 0;
+    const apply = () => {
+      raf = 0;
+      const sy = window.scrollY;
+      const vh = window.innerHeight;
+      const p = Math.min(sy / vh, 1);
+      grid.style.opacity = String(1 - p * 0.85);
+      grid.style.transform = `translateY(${-p * 32}px)`;
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(apply);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <main className="lobby-shell">
+      <MossBackdrop />
       <NavLinks />
 
-      <div className="lobby-grid">
+      <div ref={gridRef} className="lobby-grid">
         <section className="lobby-text" aria-labelledby="lobby-wordmark-label">
           <span id="lobby-wordmark-label" className="sr-only">
             Quaestor — the audit office for the machine economy.
@@ -34,6 +68,8 @@ export function Lobby() {
         </aside>
       </div>
 
+      <ScrollCue />
+
       <style>{`
         .lobby-shell {
           position: relative;
@@ -45,11 +81,14 @@ export function Lobby() {
           overflow: hidden;
         }
         .lobby-grid {
+          position: relative;
+          z-index: 1;
           display: flex;
           align-items: center;
           justify-content: space-between;
           min-height: calc(100vh - clamp(96px, 12vw, 192px));
           gap: clamp(32px, 4vw, 64px);
+          will-change: opacity, transform;
         }
         .lobby-text {
           flex: 0 0 40%;

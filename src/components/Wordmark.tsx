@@ -1,18 +1,46 @@
 /**
  * QUAESTOR wordmark — Cormorant Infant 400, per-character settle on
- * load. Pure CSS animation: each <span> carries an --i index custom
- * property; animation-delay = calc(var(--i) * 54ms). Uses a soft
- * quint-out curve: slower than a button press, firmer than page confetti.
+ * load via anime.js. Each <span> animates from translateY(14px) +
+ * opacity 0 with a 25ms stagger and 360ms ease-out-expo settle.
  *
- * Why CSS over Framer Motion here: the wordmark animation runs once
- * on mount and never again. CSS keeps the bundle smaller and avoids
- * any client-island hydration cost on the most prominent element.
+ * The intro lives on a single client-side timeline shared by Wordmark,
+ * Taglines, and the hairline. Wordmark holds the 0–250ms slot.
  */
+import { useEffect, useRef } from "react";
+import { animate, stagger } from "animejs";
+
 const TEXT = "QUAESTOR";
 
 export function Wordmark() {
+  const ref = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const letters = root.querySelectorAll(".lobby-wordmark-letter");
+    if (!letters.length) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      letters.forEach((el) => {
+        (el as HTMLElement).style.opacity = "1";
+        (el as HTMLElement).style.transform = "none";
+      });
+      return;
+    }
+
+    animate(letters, {
+      opacity: [0, 1],
+      translateY: [14, 0],
+      delay: stagger(25),
+      duration: 360,
+      ease: "outExpo",
+    });
+  }, []);
+
   return (
     <h1
+      ref={ref}
       className="lobby-wordmark"
       aria-label={TEXT}
       style={{
@@ -32,10 +60,9 @@ export function Wordmark() {
           aria-hidden="true"
           className="lobby-wordmark-letter"
           style={{
-            // CSS custom property drives the per-letter stagger
-            // through the `calc()` in the keyframe rule below.
-            ["--i" as string]: i,
             display: "inline-block",
+            opacity: 0,
+            transform: "translateY(14px)",
             willChange: "transform, opacity",
           }}
         >
@@ -43,30 +70,9 @@ export function Wordmark() {
         </span>
       ))}
       <style>{`
-        .lobby-wordmark-letter {
-          opacity: 0;
-          transform: translateY(14px);
-          animation: lobby-letter-settle 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
-          animation-delay: calc(var(--i, 0) * 54ms);
-        }
-        @keyframes lobby-letter-settle {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
         @media (max-width: 599px) {
           .lobby-wordmark {
             font-size: clamp(46px, 15vw, 72px) !important;
-          }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .lobby-wordmark-letter {
-            animation: lobby-letter-fade 400ms ease-out both;
-            animation-delay: 0ms;
-          }
-          @keyframes lobby-letter-fade {
-            to { opacity: 1; transform: none; }
           }
         }
       `}</style>
